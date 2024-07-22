@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct Router: View {
     @State private var navigator: Navigator
 

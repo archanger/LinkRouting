@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct RouteLink<Label: View>: View {
     @Environment(Navigator.self) var nav
     let label: () -> Label

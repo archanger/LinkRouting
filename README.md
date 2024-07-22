@@ -46,7 +46,7 @@ Now, we have two routes, and the only thing we have to do is to implement anothe
 Router(routes: [
     Route(path: "/", builder: { _ in HomeView() }, children: [
         Route(path: "favorites", builder: { _ in FavoritesView() }),
- ]),
+    ]),
 ])
 ```
 
@@ -63,7 +63,7 @@ Router(routes: [
     Route(path: "/", builder: { _ in HomeView() }, children: [
         Route(path: "favorites", builder: { _ in FavoritesView() }),
         Route(path: "details", builder: { _ in DetailsView() }, isModal: true),
- ]),
+    ]),
 ])
 ```
 
@@ -83,7 +83,7 @@ Router.tabbed(tabs: [
         labelBuilder: { Label("Home", systemImage: "house") },
         children: [
             Route(path: "details", builder: { _ in NamedView(text: "Details")}),
- ]
+        ]
     ),
     TabRoute(
         path: "/favorites",
@@ -110,7 +110,7 @@ struct HomeView: View {
         VStack {
             List {
                 Button("open \"/favorites\"") {
- navigator.go(to: "/favorites")
+                    navigator.go(to: "/favorites")
                 }
                 RouteLink(
                     label: {

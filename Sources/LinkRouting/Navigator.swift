@@ -4,6 +4,7 @@ public enum NavigatorError: Error {
     case rootPathDoesNotPresentInRoutes
 }
 
+@MainActor
 @Observable
 public class Navigator {
     var path = NavigationPath()
@@ -111,10 +112,12 @@ struct RoutePath {
     let crumbs: [Crumb]
 }
 
+@MainActor
 func _BuildMap(routes: [AnyRouteProtocol]) -> [RoutePath] {
     routes.map { _buildMap(route: $0) }.flatMap { $0 }
 }
 
+@MainActor
 func _buildMap(route: AnyRouteProtocol) -> [RoutePath] {
     let currentCrumb = Crumb(pathComponent: route.path, isModal: route.isModal, build: route.build)
 

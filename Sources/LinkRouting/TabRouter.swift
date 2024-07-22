@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 struct TabRouter: View {
     @State private var navigator: TabNavigator
     let routes: [AnyTabRouteProtocol]

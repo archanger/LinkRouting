@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 @Observable
 public final class TabNavigator: Navigator {
     var navigators: [Navigator] = []

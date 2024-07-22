@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct Route<Content: View>: AnyRouteProtocol {
     public let path: String
     let builder: (String?) -> Content
@@ -23,6 +24,7 @@ public struct Route<Content: View>: AnyRouteProtocol {
     }
 }
 
+@MainActor
 public struct TabRoute<Content: View, Label: View>: AnyTabRouteProtocol {
     public var path: String
     public let isModal = false

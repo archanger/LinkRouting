@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public protocol AnyRouteProtocol {
     var path: String { get }
     var children: [AnyRouteProtocol] { get }
