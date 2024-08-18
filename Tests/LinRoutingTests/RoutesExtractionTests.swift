@@ -18,14 +18,15 @@ struct RoutesExtractionTests {
                     ]
                 )
             ],
-            path: "/details/8888-0000"
+            path: "/details/8888-0000",
+            accumulatedParams: Parameters()
         )
 
         try #require(result != nil)
         #expect(result?.count == 3)
-        #expect(result![0].0 == nil)
-        #expect(result![1].0 == nil)
-        #expect(result![2].0 == "8888-0000")
+        #expect(result![0].0.isEmpty)
+        #expect(result![1].0.isEmpty)
+        #expect(result![2].0["id"] == "8888-0000")
     }
 
     @Test
@@ -39,20 +40,21 @@ struct RoutesExtractionTests {
                         Crumb(pathComponent: "details", isModal: false, build: { _ in AnyView(Text("details"))}),
                         Crumb(pathComponent: ":id", isModal: false, build: { id in AnyView(Text("\(String(describing: id))")) }),
                         Crumb(pathComponent: "item", isModal: false, build: { _ in AnyView(Text("item"))}),
-                        Crumb(pathComponent: ":id", isModal: false, build: { id in AnyView(Text("\(String(describing: id))")) }),
+                        Crumb(pathComponent: ":id2", isModal: false, build: { id in AnyView(Text("\(String(describing: id))")) }),
                     ]
                 )
             ],
-            path: "/details/8888-0000/item/02"
+            path: "/details/8888-0000/item/02",
+            accumulatedParams: Parameters()
         )
 
         try #require(result != nil)
         #expect(result?.count == 5)
-        #expect(result![0].0 == nil)
-        #expect(result![1].0 == nil)
-        #expect(result![2].0 == "8888-0000")
-        #expect(result![3].0 == nil)
-        #expect(result![4].0 == "02")
+        #expect(result![0].0.isEmpty)
+        #expect(result![1].0.isEmpty)
+        #expect(result![2].0["id"] == "8888-0000")
+        #expect(result![3].0.isEmpty == false)
+        #expect(result![4].0["id2"] == "02")
     }
 
 }

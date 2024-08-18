@@ -4,6 +4,8 @@ public enum NavigatorError: Error {
     case rootPathDoesNotPresentInRoutes
 }
 
+public typealias Parameters = [String: String]
+
 @MainActor
 @Observable
 public class Navigator {
@@ -17,21 +19,32 @@ public class Navigator {
     private let parentNavigator: Navigator?
     private var modalMap: [RoutePath]?
     private var modalRoot: String?
+    private var initialParameters: Parameters
 
-    init(routes: [AnyRouteProtocol], root: String = "/", parent: Navigator? = nil, initialSlug: String? = nil) throws {
+    init(
+        routes: [AnyRouteProtocol],
+        root: String = "/",
+        parent: Navigator? = nil,
+        initialParameters: Parameters = [:]
+    ) throws {
         self.rootPath = root
         guard let root = routes.first(where: { $0.path == root }) else {
             throw NavigatorError.rootPathDoesNotPresentInRoutes
         }
         self.parentNavigator = parent
-        self.root = RouteBox(slug: initialSlug, route: Crumb(pathComponent: root.path, isModal: root.isModal, build: root.build))
+        self.root = RouteBox(
+            parameters: initialParameters,
+            route: Crumb(pathComponent: root.path, isModal: root.isModal, build: root.build)
+        )
         self.map = _BuildMap(routes: routes)
+        self.initialParameters = initialParameters
     }
 
-    init(map: [RoutePath], rootPath: String, parent: Navigator? = nil) {
+    init(map: [RoutePath], rootPath: String, parent: Navigator? = nil, initialParameters: Parameters) {
         self.rootPath = rootPath
         self.parentNavigator = parent
         self.map = map
+        self.initialParameters = initialParameters
     }
 
     func modalNavigator() -> Navigator {
@@ -39,7 +52,8 @@ public class Navigator {
         let nav = Navigator(
             map: modalMap ?? [],
             rootPath: modalRoot,
-            parent: self
+            parent: self,
+            initialParameters: initialParameters
         )
         nav.go(to: modalPath ?? "/")
         return nav
@@ -52,17 +66,20 @@ public class Navigator {
     func go(to path: String, caller: Navigator? = nil) {
         let relativePath = (path.hasSuffix("/" + rootPath) ? rootPath : nil)
             ?? path.range(of: rootPath + "/").map { String(path[$0.lowerBound...]) }
-        let routes = findRoute(map: map, path: relativePath ?? path)
 
         guard
-            let routes
+            let routes = findRoute(
+                map: map,
+                path: relativePath ?? path,
+                accumulatedParams: initialParameters
+            )
         else {
             if let parent = parentNavigator {
                 parent.go(to: path, caller: self)
             } else {
                 // TODO: parameterize NotFound
                 (caller ?? self).path.append(
-                    RouteBox(slug: nil, route: Crumb(
+                    RouteBox(parameters: [:], route: Crumb(
                         pathComponent: "not-found",
                         isModal: false,
                         build: { _ in AnyView(Text("404: Page Not Found")) }
@@ -71,8 +88,8 @@ public class Navigator {
             return
         }
 
-        rootPath = routes.first?.0 ?? self.rootPath
-        root = routes.first.map { RouteBox(slug: $0.0, route: $0.1) }
+        rootPath = routes.first?.1.pathComponent ?? self.rootPath
+        root = routes.first.map { RouteBox(parameters: $0.0, route: $0.1) }
 
         let path = routes.dropFirst()
         if let modalIndex = path.firstIndex(where: { $0.1.isModal == true }) {
@@ -85,7 +102,8 @@ public class Navigator {
                 .joined(separator: "/")
                 .replacingOccurrences(of: "//", with: "/")
 
-            modalPath = newCrumbs.map { $0.0 ?? $0.1.pathComponent }.joined(separator: "/")
+            modalPath = newCrumbs.map { $0.0[String($0.1.pathComponent.dropFirst())] ?? $0.1.pathComponent }.joined(separator: "/")
+            initialParameters = newCrumbs.first?.0 ?? initialParameters
 
             modalRoot = path[modalIndex].1.pathComponent
 
@@ -104,7 +122,7 @@ public class Navigator {
 struct Crumb {
     let pathComponent: String
     let isModal: Bool
-    let build: (String?) -> AnyView
+    let build: (Parameters) -> AnyView
 }
 
 struct RoutePath {
@@ -131,41 +149,34 @@ func _buildMap(route: AnyRouteProtocol) -> [RoutePath] {
     }.flatMap { $0 } + [RoutePath(path: route.path, crumbs: [currentCrumb])]
 }
 
-func findRoute(map: [RoutePath], path: String) -> [(String?, Crumb)]? {
-    map.map { extract(pattern: $0, path: path) }.first(where: { $0 != nil }) ?? nil
+func findRoute(map: [RoutePath], path: String, accumulatedParams: Parameters) -> [(Parameters, Crumb)]? {
+    map.map {
+        extract(pattern: $0, path: path, accumulatedParams: accumulatedParams)
+    }.first(where: { $0 != nil }) ?? nil
 }
 
-func extract(pattern: RoutePath, path: String) -> [(String?, Crumb)]? {
+func extract(pattern: RoutePath, path: String, accumulatedParams: Parameters) -> [(Parameters, Crumb)]? {
     var pathComponents = path.splitIncludingRoot()
     let components = pattern.crumbs
 
-    var result: [(String?, Crumb)] = []
+    var result: [(Parameters, Crumb)] = []
+    var params = accumulatedParams
 
     for component in components {
-        if component.pathComponent.contains(":") {
-            var param: String? = nil
-            for sc in component.pathComponent.splitIncludingRoot() {
-                if pathComponents.isEmpty { return nil }
-                if sc.hasPrefix(":") {
-                    param = String(pathComponents[0])
-                    pathComponents = Array(pathComponents.dropFirst())
-                } else {
-                    pathComponents = Array(pathComponents.dropFirst())
-                }
+        for subComponent in component.pathComponent.splitIncludingRoot() {
+            if pathComponents.isEmpty { return nil }
+            if subComponent.hasPrefix(":") {
+                let paramName = String(subComponent.dropFirst())
+                let param = String(pathComponents[0])
+                params[paramName] = param
+                pathComponents = Array(pathComponents.dropFirst())
+            } else if pathComponents[0] == subComponent {
+                pathComponents = Array(pathComponents.dropFirst())
+            } else {
+                return nil
             }
-            result.append((param, component))
-        } else {
-            let subComponents = component.pathComponent.splitIncludingRoot()
-            for sc in subComponents {
-                if pathComponents.isEmpty { return nil }
-                if pathComponents[0] == sc {
-                    pathComponents = Array(pathComponents.dropFirst())
-                } else {
-                    return nil
-                }
-            }
-            result.append((nil, component))
         }
+        result.append((params, component))
     }
 
     return pathComponents.isEmpty ? result : nil

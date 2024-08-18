@@ -2,6 +2,8 @@
 import SwiftUI
 import Testing
 
+@MainActor
+@Suite
 struct NavigatorTests {
 
     @Test

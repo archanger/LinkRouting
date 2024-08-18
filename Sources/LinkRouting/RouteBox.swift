@@ -8,11 +8,11 @@ struct RouteBox: Hashable {
     }
 
     let route: Crumb
-    let slug: String?
+    let parameters: Parameters
 
-    init(slug: String?, route: Crumb) {
+    init(parameters: Parameters, route: Crumb) {
         self.route = route
-        self.slug = slug
+        self.parameters = parameters
     }
 }
 

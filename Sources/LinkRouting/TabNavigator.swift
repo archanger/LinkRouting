@@ -19,7 +19,7 @@ public final class TabNavigator: Navigator {
 
         guard let nav else {
             let current = navigators.first(where: { nav in nav.rootPath == rootPath })
-            current?.path.append(RouteBox(slug: nil, route: Crumb(pathComponent: "not-found", isModal: false, build: { _ in
+            current?.path.append(RouteBox(parameters: [:], route: Crumb(pathComponent: "not-found", isModal: false, build: { _ in
                 AnyView(Text("404: Page Not Found"))
             })))
             return

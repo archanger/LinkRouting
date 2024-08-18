@@ -19,10 +19,10 @@ public struct Router: View {
     public var body: some View {
         NavigationStack(path: $navigator.path) {
             if let box = navigator.root {
-                box.route.build(box.slug)
+                box.route.build(box.parameters)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .navigationDestination(for: RouteBox.self, destination: { box in
-                        box.route.build(box.slug)
+                        box.route.build(box.parameters)
                     })
             } else {
                 AnyView(Text("404: Page Not Found"))

@@ -3,13 +3,13 @@ import SwiftUI
 @MainActor
 public struct Route<Content: View>: AnyRouteProtocol {
     public let path: String
-    let builder: (String?) -> Content
+    let builder: (Parameters) -> Content
     public let children: [AnyRouteProtocol]
     public let isModal: Bool
 
     public init(
         path: String,
-        @ViewBuilder builder: @escaping (String?) -> Content,
+        @ViewBuilder builder: @escaping (Parameters) -> Content,
         children: [AnyRouteProtocol] = [],
         isModal: Bool = false
     ) {
@@ -19,7 +19,7 @@ public struct Route<Content: View>: AnyRouteProtocol {
         self.isModal = isModal
     }
 
-    public func build(slug: String?) -> AnyView {
+    public func build(slug: Parameters) -> AnyView {
         AnyView(builder(slug))
     }
 }
@@ -30,12 +30,12 @@ public struct TabRoute<Content: View, Label: View>: AnyTabRouteProtocol {
     public let isModal = false
     public var children: [any AnyRouteProtocol]
 
-    let builder: (String?) -> Content
+    let builder: (Parameters) -> Content
     let labelBuilder: () -> Label
 
     public init(
         path: String,
-        @ViewBuilder builder: @escaping (String?) -> Content,
+        @ViewBuilder builder: @escaping (Parameters) -> Content,
         @ViewBuilder labelBuilder: @escaping () -> Label,
         children: [any AnyRouteProtocol]
     ) {
@@ -45,7 +45,7 @@ public struct TabRoute<Content: View, Label: View>: AnyTabRouteProtocol {
         self.labelBuilder = labelBuilder
     }
 
-    public func build(slug: String?) -> AnyView {
+    public func build(slug: Parameters) -> AnyView {
         AnyView(builder(slug))
     }
 
