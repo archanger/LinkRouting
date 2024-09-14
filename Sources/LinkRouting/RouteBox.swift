@@ -23,7 +23,7 @@ extension RouteBox: Codable {
 
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(route.pathComponent, forKey: .path)
+        try container.encode(replaceKey(in: route.pathComponent, from: parameters), forKey: .path)
     }
 
     init(from decoder: any Decoder) throws {

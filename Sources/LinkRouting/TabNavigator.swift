@@ -14,7 +14,7 @@ public final class TabNavigator: Navigator {
 
     override func go(to path: String, caller: Navigator? = nil) {
         let nav = navigators.first { nav in
-            nav.map.map(\.path).contains(path)
+            nav.map.map(\.path).contains { hasPath(path, in: $0) }
         }
 
         guard let nav else {

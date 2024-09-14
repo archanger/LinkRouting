@@ -12,6 +12,9 @@ struct FavoritesView: View {
             Button("say \"/hi\"") {
                 navigator.go(to: "/hi")
             }
+            Button("say \"/hi/myId\"") {
+                navigator.go(to: "/hi/myId")
+            }
             Button("open unknown page") {
                 navigator.go(to: "/url/that/does/not/exist")
             }

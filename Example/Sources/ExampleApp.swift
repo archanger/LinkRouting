@@ -13,7 +13,8 @@ struct ExampleApp: App {
                     children: [
                         Route(path: "details", builder: { _ in NamedView(text: "Details")}),
                         Route(path: "hi", builder: { _ in NamedView(text: "Details")}, isModal: true),
-                        Route(path: "details/:id", builder: { param in NamedView(text: param ?? "No param")}),
+                        Route(path: "hi/:id", builder: { params in NamedView(text: params["id"] ?? "OOps")}, isModal: true),
+                        Route(path: "details/:id", builder: { params in NamedView(text: params["id"] ?? "No param")}, isModal: true),
                     ]
                 ),
                 TabRoute(
