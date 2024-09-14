@@ -88,7 +88,9 @@ public class Navigator {
             return
         }
 
-        rootPath = routes.first?.1.pathComponent ?? self.rootPath
+        rootPath = routes.first.map { (params, crumb) in
+            replaceKey(in: crumb.pathComponent, from: params)
+        } ?? self.rootPath
         root = routes.first.map { RouteBox(parameters: $0.0, route: $0.1) }
 
         let path = routes.dropFirst()
@@ -102,12 +104,14 @@ public class Navigator {
                 .joined(separator: "/")
                 .replacingOccurrences(of: "//", with: "/")
 
-            modalPath = newCrumbs.map { $0.0[String($0.1.pathComponent.dropFirst())] ?? $0.1.pathComponent }.joined(separator: "/")
+            modalPath = newCrumbs.map { (params, crumb) in
+                replaceKey(in: crumb.pathComponent, from: params)
+            }.joined(separator: "/")
             initialParameters = newCrumbs.first?.0 ?? initialParameters
 
             modalRoot = path[modalIndex].1.pathComponent
 
-            modalMap = map.filter { $0.path.hasPrefix(prev) }.map { routePath in
+            modalMap = map.filter { hasPath(prev, in: $0.path) }.map { routePath in
                 let newCrumbs = routePath.crumbs.drop { $0.pathComponent != modalRoot}
                 return RoutePath(path: newCrumbs.map(\.pathComponent).joined(separator: "/"), crumbs: Array(newCrumbs))
             }
@@ -117,6 +121,41 @@ public class Navigator {
             self.path = NavigationPath(path.map(RouteBox.init))
         }
     }
+}
+
+func hasPath(_ path: String, in template: String) -> Bool {
+    let pathComponents = path.split(separator: "/")
+    let templateComponents = template.split(separator: "/")
+
+    guard pathComponents.count <= templateComponents.count else {
+        return false
+    }
+    
+    for (pathComponent, templateComponent) in zip(pathComponents, templateComponents) {
+        if templateComponent.hasPrefix(":") {
+            continue
+        }
+        if pathComponent != templateComponent {
+            return false
+        }
+    }
+
+    return true
+}
+
+func replaceKey(in path: String, from params: Parameters) -> String {
+    guard let colonRange = path.range(of: ":") else {
+        return path
+    }
+
+    let keyStartIndex = path.index(after: colonRange.lowerBound)
+    let key = String(path[keyStartIndex...])
+
+    return params[key].map {
+        var path = path
+        path.replaceSubrange(colonRange.lowerBound..., with: $0)
+        return path
+    } ?? path
 }
 
 struct Crumb {

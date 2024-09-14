@@ -14,7 +14,7 @@ struct RoutesExtractionTests {
                     crumbs: [
                         Crumb(pathComponent: "/", isModal: false, build: { _ in AnyView(Text("root")) }),
                         Crumb(pathComponent: "details", isModal: false, build: { _ in AnyView(Text("details"))}),
-                        Crumb(pathComponent: ":id", isModal: false, build: { id in AnyView(Text("\(String(describing: id))")) })
+                        Crumb(pathComponent: ":id", isModal: true, build: { id in AnyView(Text("\(String(describing: id))")) })
                     ]
                 )
             ],
