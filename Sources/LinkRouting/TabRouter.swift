@@ -5,8 +5,8 @@ struct TabRouter: View {
     @State private var navigator: TabNavigator
     let routes: [AnyTabRouteProtocol]
 
-    init(routes: [AnyTabRouteProtocol]) {
-        self.navigator = try! TabNavigator(tabs: routes, rootPath: "/")
+    init(routes: [AnyTabRouteProtocol], rootPath: String?) {
+        self.navigator = try! TabNavigator(tabs: routes, rootPath: rootPath ?? routes.first?.path ?? "/")
         self.routes = routes
     }
 

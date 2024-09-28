@@ -4,8 +4,8 @@ import SwiftUI
 public struct Router: View {
     @State private var navigator: Navigator
 
-    static public func tabbed(tabs: [AnyTabRouteProtocol]) -> some View {
-        TabRouter(routes: tabs)
+    static public func tabbed(tabs: [AnyTabRouteProtocol], rootPath: String? = nil) -> some View {
+        TabRouter(routes: tabs, rootPath: rootPath)
     }
 
     public init(routes: [AnyRouteProtocol], root: String = "/") {

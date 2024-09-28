@@ -7,7 +7,7 @@ struct ExampleApp: App {
         WindowGroup {
             Router.tabbed(tabs: [
                 TabRoute(
-                    path: "/",
+                    path: "/home",
                     builder: { _ in HomeView() },
                     labelBuilder: { Label("Home", systemImage: "house") },
                     children: [
